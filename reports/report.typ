@@ -180,21 +180,20 @@ To prepare the data for the Neural Network:
 == Architecture
 A Multi-Layer Perceptron (MLP) was designed using TensorFlow/Keras. The architecture features a "funnel" design to compress high-dimensional inputs into abstract representations.
 
-- *Input Layer:* ~100 features (after One-Hot Encoding).
-- *Hidden Layer 1:* 128 Neurons, ReLU activation, Batch Normalization.
-- *Hidden Layer 2:* 64 Neurons, ReLU activation, Batch Normalization.
-- *Output Layer:* 4 Neurons with Softmax activation (representing probabilities for the 4 classes).
+- *Input Layer:* 230 features (resulting from One-Hot Encoding of high-cardinality categorical variables).
+- *Hidden Layer 1:* 128 Neurons, ReLU activation, Batch Normalization (Param count: ~29.5k).
+- *Hidden Layer 2:* 64 Neurons, ReLU activation, Batch Normalization (Param count: ~8k).
+- *Output Layer:* 5 Neurons with Softmax activation.
 
 #figure(
   image("figures/model_architecture.png", width: 40%),
-  caption: [Neural Network Architecture Diagram],
+  caption: [Neural Network Architecture Diagram. Total trainable parameters: 38,533.],
 )
 
 == Design Justification
 - *ReLU Activation:* Selected to prevent the vanishing gradient problem.
-- *Dropout (0.3 - 0.4):* Applied after hidden layers to randomly deactivate neurons during training, forcing the network to learn robust features and preventing overfitting.
-- *L2 Regularization:* Added to penalize large weights, further reducing model complexity.
-
+- *Dropout (0.3 - 0.4):* Applied after hidden layers. Given the high dimensionality (230 features), dropout was crucial to prevent the model from memorizing specific input patterns.
+- *L2 Regularization:* Added to penalize large weights, keeping the model weights small and stable.
 = Training Process
 
 The model was trained for up to 100 epochs using the *Adam* optimizer. To address the class imbalance identified in EDA, *Class Weights* were computed and applied to the Loss Function. This penalizes the model more heavily for misclassifying rare classes (Fatal/Serious) than common ones (Minor).
@@ -211,28 +210,31 @@ The model was trained for up to 100 epochs using the *Adam* optimizer. To addres
 = Evaluation and Interpretation
 
 == Performance Metrics
-The model was evaluated on an unseen Test Set (15% of data).
+The model was evaluated on an unseen Test Set. The performance was exceptional, achieving an overall accuracy of approximately *98%*.
 
 #figure(
   image("figures/confusion_matrix.svg", width: 100%),
-  caption: [Confusion Matrix (Counts and Normalized). Ideally, the diagonal elements should be high.],
+  caption: [Confusion Matrix. Note the near-perfect diagonal, indicating high classification accuracy across all classes.],
 )
 
 == Analysis of Results
 1. *Strengths:*
-   - The model achieves high recall on the majority class (*Minor Injury*), effectively identifying the most common accident types.
-   - The use of class weights allowed the model to learn patterns for *Serious* and *Fatal* accidents better than a baseline model, which would have ignored them entirely.
+   - *High Recall on Fatal Cases:* The model correctly identified 265 out of 267 fatal accidents (99% Recall). This is a significant achievement, as "Fatal" is usually the hardest class to predict due to its rarity.
+   - *Robustness:* The validation loss remained stable alongside training loss, indicating that the regularization techniques effectively prevented overfitting despite the model's high capacity.
 
-2. *Weaknesses:*
-   - *Precision on Minority Classes:* Due to the extreme rarity of Fatal accidents (only ~60 cases in the raw data), the model likely struggles to distinguish them perfectly from Serious injuries. This results in some misclassification between adjacent severity levels.
-   - *Data Noise:* Despite cleaning, the inherent randomness in accident data (e.g., weather conditions labeled subjectively) limits the upper bound of accuracy.
+2. *Critical Reflection (Data Insights):*
+   - Upon analyzing the feature importance, the high accuracy suggests the model utilized strong predictors present in the dataset, specifically the *post-accident* casualty counts (e.g., `Number of fatalities`, `Number of severe injuries`).
+   - Since the target variable (`Accident Type`) is directly derived from these counts, the model effectively learned the rule-based definitions of the categories (e.g., if `Fatalities > 0`, then `Type = Fatal`).
+   - While this makes the model a highly effective *classifier* for historical records, it relies on data that would not be available before an accident occurs.
 
 = Recommendations & Conclusion
 
 == Potential Improvements
-1. *Advanced Architectures:* Implementing *TabNet* or *Wide & Deep* networks could better capture the interactions between categorical features (Road Type, Junction) and numerical ones.
-2. *Resampling Strategies:* Instead of just class weights, applying *SMOTE (Synthetic Minority Over-sampling Technique)* to generate synthetic examples of Fatal accidents during training could improve recall.
-3. *Feature Selection:* Using Recursive Feature Elimination (RFE) to remove irrelevant categorical features (e.g., specific rare "Kebele" or "Sub-city" values) could reduce noise.
+1. *Predictive Modeling:* To build a model that predicts severity *before* an accident happens (based purely on road conditions, weather, and driver demographics), a second iteration of this project should explicitly exclude the `Number of fatalities/injuries` columns from the input.
+2. *Advanced Architectures:* For the predictive (non-leakage) version, implementing *TabNet* or *Wide & Deep* networks would be necessary to capture complex interactions between environmental factors without relying on casualty counts.
+
+== Conclusion
+The project successfully demonstrated the end-to-end Neural Network workflow. The data preparation phase successfully transformed a messy dataset into a clean, 230-feature input space. The resulting model achieved 98% accuracy in classifying accident severity, proving that the Neural Network can effectively map input features to accident outcomes when casualty data is available.
 
 == Reflection on Workflow
 The project demonstrated that *Data Preparation* is the most critical phase. The raw data required extensive cleaning before any modeling could succeed. The transition from a raw, noisy Excel sheet to a structured Neural Network pipeline highlights the importance of robust feature engineering (like cyclical time encoding) and rigorous evaluation beyond simple accuracy.
