@@ -133,7 +133,7 @@
 
 
 #show: hilcoe-report.with(
-  title: [Group Report \ on \ Machine Learning],
+  title: [Classifying Car Crashes \ Using \ Neural Networks],
   instructor: "Dr. Seyoum Abebe",
   members: (
     "Alazar Gebremehdin",
@@ -219,13 +219,13 @@ The model was evaluated on an unseen Test Set. The performance was exceptional, 
 
 == Analysis of Results
 1. *Strengths:*
-   - *High Recall on Fatal Cases:* The model correctly identified 265 out of 267 fatal accidents (99% Recall). This is a significant achievement, as "Fatal" is usually the hardest class to predict due to its rarity.
-   - *Robustness:* The validation loss remained stable alongside training loss, indicating that the regularization techniques effectively prevented overfitting despite the model's high capacity.
+  - *High Recall on Fatal Cases:* The model correctly identified 265 out of 267 fatal accidents (99% Recall). This is a significant achievement, as "Fatal" is usually the hardest class to predict due to its rarity.
+  - *Robustness:* The validation loss remained stable alongside training loss, indicating that the regularization techniques effectively prevented overfitting despite the model's high capacity.
 
 2. *Critical Reflection (Data Insights):*
-   - Upon analyzing the feature importance, the high accuracy suggests the model utilized strong predictors present in the dataset, specifically the *post-accident* casualty counts (e.g., `Number of fatalities`, `Number of severe injuries`).
-   - Since the target variable (`Accident Type`) is directly derived from these counts, the model effectively learned the rule-based definitions of the categories (e.g., if `Fatalities > 0`, then `Type = Fatal`).
-   - While this makes the model a highly effective *classifier* for historical records, it relies on data that would not be available before an accident occurs.
+  - Upon analyzing the feature importance, the high accuracy suggests the model utilized strong predictors present in the dataset, specifically the *post-accident* casualty counts (e.g., `Number of fatalities`, `Number of severe injuries`).
+  - Since the target variable (`Accident Type`) is directly derived from these counts, the model effectively learned the rule-based definitions of the categories (e.g., if `Fatalities > 0`, then `Type = Fatal`).
+  - While this makes the model a highly effective *classifier* for historical records, it relies on data that would not be available before an accident occurs.
 
 = Recommendations & Conclusion
 

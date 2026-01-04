@@ -7,15 +7,15 @@
 #codly(
   languages: (
     python: (name: "Python", icon: none, color: rgb("#3572A5")),
-  )
+  ),
 )
 
 #let authors = (
   "Alazar Gebremehdin",
-   "Hannibal Mussie",
-   "Feruz Seid",
-   "Yassin Bedru",
-   "Samir Bahru",
+  "Hannibal Mussie",
+  "Feruz Seid",
+  "Yassin Bedru",
+  "Samir Bahru",
 )
 
 #show math.equation: set text(font: "STIX Two Math")
@@ -26,7 +26,7 @@
   font: ("TeX Gyre Schola", "Noto Serif Ethiopic"),
   tracking: -0.03em,
   ligatures: true,
-  number-type: "old-style"
+  number-type: "old-style",
 )
 
 #set par(justify: true)
@@ -57,11 +57,11 @@
   *Goal:* Predict the severity of road traffic accidents (*Fatal, Serious, Minor, PDO*) based on accident characteristics.
 
   *The Workflow:*
-  1.  *Data Understanding:* Handling massive missing data and inconsistencies.
-  2.  *Preparation:* Cleaning, Imputation, and Feature Engineering.
-  3.  *Modeling:* Designing a Multi-Layer Perceptron (MLP).
-  4.  *Training:* Managing class imbalance and overfitting.
-  5.  *Evaluation:* F1-Scores and Confusion Matrices.
+  1. *Data Understanding:* Handling massive missing data and inconsistencies.
+  2. *Preparation:* Cleaning, Imputation, and Feature Engineering.
+  3. *Modeling:* Designing a Multi-Layer Perceptron (MLP).
+  4. *Training:* Managing class imbalance and overfitting.
+  5. *Evaluation:* F1-Scores and Confusion Matrices.
 ]
 
 = Data Understanding (EDA)
@@ -126,15 +126,15 @@
 #slide[
   Before feeding data into the Neural Network:
 
-  1.  *Imputation:*
-      - Numerical (Age, Experience) $->$ *Median*
-      - Categorical (Road Surface, Light) $->$ *Mode*
-  2.  *Scaling:*
-      - `StandardScaler` applied to numerical inputs to normalize variance.
-  3.  *Encoding:*
-      - `OneHotEncoder` for categorical variables.
-  4.  *Splitting:*
-      - Train (70%) / Validation (15%) / Test (15%).
+  1. *Imputation:*
+    - Numerical (Age, Experience) $->$ *Median*
+    - Categorical (Road Surface, Light) $->$ *Mode*
+  2. *Scaling:*
+    - `StandardScaler` applied to numerical inputs to normalize variance.
+  3. *Encoding:*
+    - `OneHotEncoder` for categorical variables.
+  4. *Splitting:*
+    - Train (70%) / Validation (15%) / Test (15%).
 ]
 
 = Model Design
@@ -143,16 +143,16 @@
 
 #slide[
   Based on the execution results:
-  
-  -   *Input Shape:* 230 Features (High dimensionality due to One-Hot Encoding).
-  -   *Total Parameters:* 38,917 (Lightweight model).
-  -   *Trainable Params:* 38,533.
-  
+
+  - *Input Shape:* 230 Features (High dimensionality due to One-Hot Encoding).
+  - *Total Parameters:* 38,917 (Lightweight model).
+  - *Trainable Params:* 38,533.
+
   *Layer Structure:*
-  -   Input (230)
-  -   Dense (128) $->$ BN $->$ ReLU $->$ Dropout
-  -   Dense (64) $->$ BN $->$ ReLU $->$ Dropout
-  -   Output (5 Classes)
+  - Input (230)
+  - Dense (128) $->$ BN $->$ ReLU $->$ Dropout
+  - Dense (64) $->$ BN $->$ ReLU $->$ Dropout
+  - Output (5 Classes)
 ]
 
 == Implementation Code
@@ -160,23 +160,23 @@
 #slide[
   ```python
   # Actual Model Summary Output
-  Layer (type)                Output Shape              Param #   
+  Layer (type)                Output Shape              Param #
   =================================================================
-  Input_Layer (InputLayer)    (None, 230)               0         
-  Hidden_Layer_1 (Dense)      (None, 128)               29,568    
-  Batch_Norm_1                (None, 128)               512       
-  Dropout_1 (Dropout)         (None, 128)               0         
-  Hidden_Layer_2 (Dense)      (None, 64)                8,256     
-  Output_Layer (Dense)        (None, 5)                 325       
+  Input_Layer (InputLayer)    (None, 230)               0
+  Hidden_Layer_1 (Dense)      (None, 128)               29,568
+  Batch_Norm_1                (None, 128)               512
+  Dropout_1 (Dropout)         (None, 128)               0
+  Hidden_Layer_2 (Dense)      (None, 64)                8,256
+  Output_Layer (Dense)        (None, 5)                 325
   =================================================================
   Total params: 38,917
   ```
 ]
 
 #matrix-slide[
-	#rotate(-90deg)[
-		#image("figures/model_architecture.png")
-	]
+  #rotate(-90deg)[
+    #image("figures/model_architecture.png")
+  ]
 ]
 
 
@@ -188,7 +188,7 @@
   #align(center)[
     #image("figures/training_curves.svg", height: 85%)
   ]
-  
+
   *Insight:* The model converges quickly. Validation accuracy peaks around *98%*, indicating robust learning without significant overfitting.
 ]
 
@@ -206,7 +206,7 @@
   *Exceptional Performance:*
   - *Fatal Class:* 99% Recall (265 Correct, 2 Missed).
   - *Minor Class:* 98% Recall.
-  
+
   *Critical Analysis (The "Why"):*
   - The high accuracy suggests the model effectively utilized casualty count features (e.g., `Number of fatalities`) present in the dataset.
   - While excellent for *classifying* historical records, this indicates that accident outcomes (casualties) are the strongest predictors of the severity label.
@@ -217,10 +217,10 @@
 == Summary
 
 #slide[
-  1.  *Data Quality:* Cleaning and encoding resulted in 230 clean input features.
-  2.  *Model:* A 38k parameter MLP was sufficient to capture the relationships.
-  3.  *Results:* The model achieved ~98% test accuracy.
-  
+  1. *Data Quality:* Cleaning and encoding resulted in 230 clean input features.
+  2. *Model:* A 38k parameter MLP was sufficient to capture the relationships.
+  3. *Results:* The model achieved ~98% test accuracy.
+
   *Recommendation:*
   - For future *predictive* systems (pre-accident), we recommend retraining the model *excluding* the `Number of casualties` columns to test predictive power based solely on environmental factors (Road type, Weather, etc.).
 ]
