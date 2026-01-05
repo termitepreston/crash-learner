@@ -180,10 +180,10 @@ To prepare the data for the Neural Network:
 == Architecture
 A Multi-Layer Perceptron (MLP) was designed using TensorFlow/Keras. The architecture features a "funnel" design to compress high-dimensional inputs into abstract representations.
 
-- *Input Layer:* 230 features (resulting from One-Hot Encoding of high-cardinality categorical variables).
-- *Hidden Layer 1:* 128 Neurons, ReLU activation, Batch Normalization (Param count: ~29.5k).
-- *Hidden Layer 2:* 64 Neurons, ReLU activation, Batch Normalization (Param count: ~8k).
-- *Output Layer:* 5 Neurons with Softmax activation.
+- *Input Layer:* 168 features (resulting from One-Hot Encoding of high-cardinality categorical variables).
+- *Hidden Layer 1:* 128 Neurons, ReLU activation, Batch Normalization (Param count: ~21.6k).
+- *Hidden Layer 2:* 64 Neurons, ReLU activation, Batch Normalization (Param count: ~8.3k).
+- *Output Layer:* 4 Neurons with Softmax activation.
 
 #figure(
   image("figures/model_architecture.png", width: 40%),
@@ -192,41 +192,40 @@ A Multi-Layer Perceptron (MLP) was designed using TensorFlow/Keras. The architec
 
 == Design Justification
 - *ReLU Activation:* Selected to prevent the vanishing gradient problem.
-- *Dropout (0.3 - 0.4):* Applied after hidden layers. Given the high dimensionality (230 features), dropout was crucial to prevent the model from memorizing specific input patterns.
+- *Dropout (0.3 - 0.4):* Applied after hidden layers. Given the high dimensionality (168 features), dropout was crucial to prevent the model from memorizing specific input patterns.
 - *L2 Regularization:* Added to penalize large weights, keeping the model weights small and stable.
 = Training Process
 
-The model was trained for up to 100 epochs using the *Adam* optimizer. To address the class imbalance identified in EDA, *Class Weights* were computed and applied to the Loss Function. This penalizes the model more heavily for misclassifying rare classes (Fatal/Serious) than common ones (Minor).
+TThe model was trained for *50 epochs* using the *Adam* optimizer. To address the class imbalance identified in EDA, *Class Weights* were computed and applied to the Loss Function. This penalizes the model more heavily for misclassifying rare classes (Fatal/Serious) than common ones (Minor).
 
-*Overfitting Mitigation:*
-- *Early Stopping:* Training halted automatically when Validation Loss failed to improve for 15 epochs.
-- *Model Checkpointing:* Only the model version with the highest Validation Accuracy was saved.
+*Training Dynamics:*
+- *Regularization:* The gap where Validation Accuracy is higher than Training Accuracy indicates that *Dropout* layers successfully prevented the model from memorizing the training data.
+- *Stability:* The model continued to learn throughout the 50 epochs, with loss steadily decreasing, meaning *Early Stopping* (configured with patience=15) was not triggered.
 
 #figure(
   image("figures/training_curves.svg", width: 100%),
-  caption: [Training and Validation Performance Curves. Note the convergence point where Early Stopping triggers.],
+  caption: [Training and Validation Performance Curves. The model shows stable convergence over 50 epochs with Validation Accuracy peaking around 99.4%.],
 )
 
 = Evaluation and Interpretation
 
 == Performance Metrics
-The model was evaluated on an unseen Test Set. The performance was exceptional, achieving an overall accuracy of approximately *98%*.
+The model was evaluated on an unseen Test Set. The performance was exceptional, achieving an overall accuracy of approximately *99%*.
 
 #figure(
   image("figures/confusion_matrix.svg", width: 100%),
-  caption: [Confusion Matrix. Note the near-perfect diagonal, indicating high classification accuracy across all classes.],
+  caption: [Confusion Matrix. The diagonal dominance (0.99 normalized score) across all classes confirms high classification accuracy.],
 )
 
 == Analysis of Results
 1. *Strengths:*
-  - *High Recall on Fatal Cases:* The model correctly identified 265 out of 267 fatal accidents (99% Recall). This is a significant achievement, as "Fatal" is usually the hardest class to predict due to its rarity.
-  - *Robustness:* The validation loss remained stable alongside training loss, indicating that the regularization techniques effectively prevented overfitting despite the model's high capacity.
+  - *High Recall on Fatal Cases:* The model correctly identified 265 out of 267 fatal accidents. This is a significant achievement, as "Fatal" is usually the hardest class to predict due to its rarity.
+  - *Robustness:* The distinct separation of classes indicates the model found clear decision boundaries, though this was aided by the explicit nature of the input data.
 
-2. *Critical Reflection (Data Insights):*
-  - Upon analyzing the feature importance, the high accuracy suggests the model utilized strong predictors present in the dataset, specifically the *post-accident* casualty counts (e.g., `Number of fatalities`, `Number of severe injuries`).
-  - Since the target variable (`Accident Type`) is directly derived from these counts, the model effectively learned the rule-based definitions of the categories (e.g., if `Fatalities > 0`, then `Type = Fatal`).
-  - While this makes the model a highly effective *classifier* for historical records, it relies on data that would not be available before an accident occurs.
-
+2. *Critical Reflection and Insights:*
+  - Upon analyzing the feature importance, the high accuracy confirms the model utilized the *post-accident* casualty counts (e.g., `Number of fatalities`, `Number of severe injuries`).
+  - The model effectively learned the definition of the categories rather than environmental risk factors.
+  - *Recommendation:* For future predictive maintenance models, these casualty columns must be removed to force the model to learn from road conditions, weather, and driver demographics.
 = Recommendations & Conclusion
 
 == Potential Improvements

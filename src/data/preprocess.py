@@ -26,20 +26,98 @@ def clean_raw_data(df: pd.DataFrame) -> pd.DataFrame:
         "Fatal": "Fatal",
     }
     df["Accident Type"] = (
-        df["Accident Type"].map(acc_type_map).fillna(df["Accident Type"])
-    )
+        df["Accident Type"].replace(acc_type_map).fillna(df["Accident Type"])
+    ).astype("category")
 
     # 2. Fix Typographical Errors in Categorical Columns
-    df["Wor"] = df["Wor"].replace(
-        {
-            "Augest": "August",
-            "Pagume": "September",
-            "Phagume": "September",
-            "Wensday": "Wednesday",
-        }
+    df["Wor"] = (
+        df["Wor"]
+        .replace(
+            {
+                "Augest": "August",
+                "MayMay": "May",
+                "Apil": "April",
+                "aau": np.nan,
+                "ayg": np.nan,
+                "JulyJuly": "July",
+                "SeptemberSeptember": "September",
+                "SeptemberSeptemberSeptember": "September",
+                "OctoberOctober": "October",
+                "NovemberNovember": "November",
+                "DecemberDecember": "December",
+                "JanuaryJanuary": "January",
+                "FebruaryFebruary": "February",
+                "FebruaryFebruaryFebruaryFebruaryFebruary": "February",
+                "MarchMarch": "March",
+                "ApilApil": "April",
+                "Apirl": "April",
+                "my": np.nan,
+                "25": np.nan,
+                "Pagume": "September",
+                "Phagume": "September",
+                "Wensday": "Wednesday",
+            }
+        )
+        .astype("category")
     )
-    df["Day of the week"] = df["Day of the week"].replace({"Wensday": "Wednesday"})
-    df["Veh Ownership"] = df["Veh Ownership"].replace({"Privategg": "Private"})
+
+    df["Day of the week"] = (
+        df["Day of the week"].replace({"Wensday": "Wednesday"}).astype("category")
+    )
+    df["Veh Ownership"] = (
+        df["Veh Ownership"]
+        .replace(
+            {
+                "Privategg": "Private",
+                "Privaten": "Private",
+                "PP": "Private",
+                "PPP": "Private",
+                "PrivateN": "Private",
+                "pp": "Private",
+                "Privat": "Private",
+                "Employeeo": "Employee",
+                "5": "Government",
+            }
+        )
+        .astype("category")
+    )
+
+    df["Land Use"] = (
+        df["Land Use"]
+        .replace(
+            {"om": np.nan, "35": np.nan, "RS": np.nan, "RESW": np.nan, "oo": np.nan}
+        )
+        .astype("category")
+    )
+
+    df["Road Surface"] = df["Road Surface"].replace({"dry": "Dry"}).astype("category")
+
+    df["Road Character"] = (
+        df["Road Character"].replace({"straight": "Straight"}).astype("category")
+    )
+
+    df["Driver's Action"] = (
+        df["Driver's Action"]
+        .replace({"Moving straignt": "Moving straight"})
+        .astype("category")
+    )
+
+    df["Woreda (Sub-city)"] = (
+        df["Woreda (Sub-city)"]
+        .replace(
+            {
+                "kirkos": "Kirkos",
+                "Nifas silk": "Nifas Silk",
+                "Yeka--": "Yeka",
+                "s": np.nan,
+            }
+        )
+        .astype("category")
+    )
+
+    df["Primary Collision type"] = (
+        df["Primary Collision type"].replace({"Unknown": np.nan}).astype("category")
+    )
 
     # 3. Handle Numerical Outliers / Impossible Values
     # Amet (Year): 2000-2026
@@ -48,8 +126,23 @@ def clean_raw_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # Age: 16-90
     df["Driver age"] = pd.to_numeric(df["Driver age"], errors="coerce")
-    df.loc[(df["Driver age"] < 16) | (df["Driver age"] > 90), "Driver age"] = np.nan
+    df.loc[(df["Driver age"] < 16) | (df["Driver age"] > 120), "Driver age"] = np.nan
 
+    df["Victim-1 age"] = pd.to_numeric(df["Victim-1 age"], errors="coerce")
+    df.loc[(df["Victim-1 age"] < 0) | (df["Victim-1 age"] > 120), "Victim-1 age"] = (
+        np.nan
+    )
+
+    df["Victim-2 age"] = pd.to_numeric(df["Victim-2 age"], errors="coerce")
+    df.loc[(df["Victim-2 age"] < 0) | (df["Victim-2 age"] > 120), "Victim-2 age"] = (
+        np.nan
+    )
+
+    df["Victim-3 age"] = pd.to_numeric(df["Victim-3 age"], errors="coerce")
+    df.loc[(df["Victim-3 age"] < 0) | (df["Victim-3 age"] > 120), "Victim-3 age"] = (
+        np.nan
+    )
+    #
     # Experience: < 60
     df["Driver experiance(years)"] = pd.to_numeric(
         df["Driver experiance(years)"], errors="coerce"
@@ -62,17 +155,96 @@ def clean_raw_data(df: pd.DataFrame) -> pd.DataFrame:
         if pd.isna(x):
             return np.nan
         x = str(x).lower().strip()
-        if x.startswith("m"):
+        if x.startswith("ma"):
             return "Male"
-        if x.startswith("f"):
+        if x.startswith("fe"):
             return "Female"
         return np.nan
 
-    df["Driver Sex"] = df["Driver Sex"].apply(clean_sex)
+    df["Driver Sex"] = df["Driver Sex"].apply(clean_sex).astype("category")
+    df["Victim-1 Sex"] = df["Victim-1 Sex"].apply(clean_sex).astype("category")
 
     # Education
-    df["Driver Education Level"] = df["Driver Education Level"].replace(
-        "Unknown", np.nan
+    df["Driver Education Level"] = (
+        df["Driver Education Level"]
+        .replace(
+            {
+                "Unknown": np.nan,
+                "bab": np.nan,
+                "Not Mentioned": np.nan,
+                "Day-Good visibility": np.nan,
+                "brt": np.nan,
+                "Below grade 8bet": "Below grade 8",
+                "Between grade 8 and 12Between grade 8 and 12": "Between grade 8 and 12",
+                "Between grade 8 and 12Between grade 8 and 12Between grade 8 and 12Between grade 8 and 12": "Between grade 8 and 12",
+                "Between grade 8 and 12C": "Between grade 8 and 12",
+                "Between grade 8 and 123": "Between grade 8 and 12",
+                "Certificate1": "Certificate",
+                "vet": np.nan,
+            }
+        )
+        .astype("category")
+    )
+
+    df["Light Condition"] = (
+        df["Light Condition"]
+        .replace({"Dark-Unlight lighting": "Dark-Poor lighting", "Unknown": np.nan})
+        .astype("category")
+    )
+
+    df["Victim-1 Injury Severity"] = (
+        df["Victim-1 Injury Severity"]
+        .replace(
+            {
+                "Fality": "Fatality",
+                "29": np.nan,
+                "Light injury": "Light Injury",
+                "Light Injur": "Light Injury",
+                "31": np.nan,
+                "0": np.nan,
+                "ls": "Light Injury",
+                "L": "Light Injury",
+                "Li": "Light Injury",
+                "light Injury": "Light Injury",
+            }
+        )
+        .astype("category")
+    )
+
+    df["Vehicle Type"] = (
+        df["Vehicle Type"].replace({"Not Mentioned": np.nan}).astype("category")
+    )
+
+    df["Driver Vehicle Relation"] = (
+        df["Driver Vehicle Relation"]
+        .replace(
+            {
+                "e": "Employee",
+                "e'": "Employee",
+                "EE": "Employee",
+                "Employee": "Employee",
+                "employee": "Employee",
+                "Employeeo": "Employee",
+                "Not Mentioned": np.nan,
+            }
+        )
+        .astype("category")
+    )
+
+    df["Road Surface"] = df["Road Surface"].replace({"dry": "Dry"}).astype("category")
+
+    df["Victim-1 Type"] = (
+        df["Victim-1 Type"]
+        .replace(
+            {
+                "Passengerd": "Passenger",
+                "othe": "other",
+                "drive": "Driver",
+                "0": np.nan,
+                "s": np.nan,
+            }
+        )
+        .astype("category")
     )
 
     # Vehicle Defects
@@ -86,12 +258,15 @@ def clean_raw_data(df: pd.DataFrame) -> pd.DataFrame:
             return "No"
         return np.nan
 
-    df["Vehicle Defects"] = df["Vehicle Defects"].apply(clean_defects)
+    df["Vehicle Defects"] = (
+        df["Vehicle Defects"].apply(clean_defects).astype("category")
+    )
 
     # 5. Drop Columns with > 70% Missing (identified in EDA)
     # Plus identifiers like 'Accident ID' which are not features
 
     drop_cols = [
+        "Accident ID",
         "Exiting/entering",
         "Region",
         "Driving License",
@@ -106,6 +281,9 @@ def clean_raw_data(df: pd.DataFrame) -> pd.DataFrame:
         "Victim-2 Type",
         "Victim-2 Injury Severity",
         "Victim-1 Movement",
+        "Location Easting",
+        "Location Northing",
+        "Number of Casualties",
     ]
     # Filter to only drop columns that actually exist
     existing_drops = [c for c in drop_cols if c in df.columns]
@@ -192,9 +370,12 @@ def get_processed_data(df, target_col="Accident Type", test_size=0.15, val_size=
     Orchestrates the split and transformation.
     Returns: X_train, X_val, X_test, y_train, y_val, y_test (as numpy arrays or DFs), and the preprocessor.
     """
+    # 0. Drows rows in target column that are na.
+    df_clean = df.dropna(subset=[target_col]).copy()
+
     # 1. Split Features and Target
-    X = df.drop(columns=[target_col])
-    y = df[target_col]
+    X = df_clean.drop(columns=[target_col])
+    y = df_clean[target_col]
 
     # 2. Encode Target (Label Encoding for NN)
     # Map: Minor=0, PDO=1, Serious=2, Fatal=3
@@ -229,16 +410,16 @@ def get_processed_data(df, target_col="Accident Type", test_size=0.15, val_size=
     # Get feature names for interpretability later
     try:
         feature_names = preprocessor.get_feature_names_out()
-    except:
+    except (AttributeError, TypeError):
         feature_names = None
 
     return {
         "X_train": pd.DataFrame(X_train, columns=feature_names),
         "X_val": pd.DataFrame(X_val, columns=feature_names),
         "X_test": pd.DataFrame(X_test, columns=feature_names),
-        "y_train": pd.DataFrame(y_train, columns=["target"]),
-        "y_val": pd.DataFrame(y_val, columns=["target"]),
-        "y_test": pd.DataFrame(y_test, columns=["target"]),
+        "y_train": pd.DataFrame(y_train, columns=pd.Index(["target"])),
+        "y_val": pd.DataFrame(y_val, columns=pd.Index(["target"])),
+        "y_test": pd.DataFrame(y_test, columns=pd.Index(["target"])),
         "preprocessor": preprocessor,
         "label_encoder": le,
     }

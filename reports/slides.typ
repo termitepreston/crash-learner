@@ -144,15 +144,15 @@
 #slide[
   Based on the execution results:
 
-  - *Input Shape:* 230 Features (High dimensionality due to One-Hot Encoding).
-  - *Total Parameters:* 38,917 (Lightweight model).
-  - *Trainable Params:* 38,533.
+  - *Input Shape:* 168 Features (High dimensionality due to One-Hot Encoding).
+  - *Total Parameters:* 30,916 (Lightweight model).
+  - *Trainable Params:* 30,532.
 
   *Layer Structure:*
-  - Input (230)
+  - Input (168)
   - Dense (128) $->$ BN $->$ ReLU $->$ Dropout
   - Dense (64) $->$ BN $->$ ReLU $->$ Dropout
-  - Output (5 Classes)
+  - Output (4 Classes)
 ]
 
 == Implementation Code
@@ -160,16 +160,22 @@
 #slide[
   ```python
   # Actual Model Summary Output
-  Layer (type)                Output Shape              Param #
+  Layer (type)                       Output Shape              Param #
   =================================================================
-  Input_Layer (InputLayer)    (None, 230)               0
-  Hidden_Layer_1 (Dense)      (None, 128)               29,568
-  Batch_Norm_1                (None, 128)               512
-  Dropout_1 (Dropout)         (None, 128)               0
-  Hidden_Layer_2 (Dense)      (None, 64)                8,256
-  Output_Layer (Dense)        (None, 5)                 325
+  Input_Layer (InputLayer)           (None, 168)               0
+  Hidden_Layer_1 (Dense)             (None, 128)               21,632
+  Batch_Norm_1 (BatchNormalization)  (None, 128)               512
+  ReLU_1 (Activation)                (None, 128)               0
+  Dropout_1 (Dropout)                (None, 128)               0
+  Hidden_Layer_2 (Dense)             (None, 64)                8,256
+  Batch_Norm_2 (BatchNormalization)  (None, 64)                256
+  ReLU_2 (Activation)                (None, 64)                0
+  Dropout_2 (Dropout)                (None, 64)                0
+  Output_Layer (Dense)               (None, 4)                 260
   =================================================================
-  Total params: 38,917
+  Total params: 30,916
+  Trainable params: 30,532
+  Non-trainable params: 384
   ```
 ]
 
@@ -204,12 +210,13 @@
 
 #slide[
   *Exceptional Performance:*
-  - *Fatal Class:* 99% Recall (265 Correct, 2 Missed).
-  - *Minor Class:* 98% Recall.
+  - *Fatal Class:* >99% Recall (265 Correct, only 2 Missed).
+  - *Minor/PDO:* ~99% Accuracy.
 
   *Critical Analysis (The "Why"):*
-  - The high accuracy suggests the model effectively utilized casualty count features (e.g., `Number of fatalities`) present in the dataset.
-  - While excellent for *classifying* historical records, this indicates that accident outcomes (casualties) are the strongest predictors of the severity label.
+  - The accuracy stems from including casualty counts (e.g., `Number of fatalities`) in the input.
+  - The model learned the *definition* of the accident types rather than the *cause*.
+  - Useful for automated tagging, but requires feature removal for risk prediction.
 ]
 
 = Conclusion
@@ -217,10 +224,10 @@
 == Summary
 
 #slide[
-  1. *Data Quality:* Cleaning and encoding resulted in 230 clean input features.
-  2. *Model:* A 38k parameter MLP was sufficient to capture the relationships.
-  3. *Results:* The model achieved ~98% test accuracy.
-
+  1. *Data Quality:* Cleaning and encoding resulted in 168 clean input features.
+  2. *Model:* A lightweight 31k parameter MLP was sufficient to capture the logic.
+  3. *Results:* The model achieved ~99% test accuracy due to strong feature correlations.
+  
   *Recommendation:*
   - For future *predictive* systems (pre-accident), we recommend retraining the model *excluding* the `Number of casualties` columns to test predictive power based solely on environmental factors (Road type, Weather, etc.).
 ]
